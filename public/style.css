@@ -1,18 +1,12 @@
 body {
    margin: 0;
    padding: 0;
+   background-size: cover;
+   background-repeat: no-repeat;
+   height: 100vh;
 }
 
-.main {
-   width: 100vw;
-   /* border: 1px solid red; */
-   box-sizing: border-box;
-   object-fit: contain;
-}
 
-img {
-   display: block;
-   width: 100%;
-   margin-left: auto;
-   margin-right: auto;
-}
+
+
+
