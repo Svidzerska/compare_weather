@@ -51,6 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
       addHandle() {
          this.view.addButton.addEventListener("click", this.addCity);
       }
+
+      getCityGeo(latitude,longitude) {
+         $.ajax({ url:'http://api.openweathermap.org/geo/1.0/reverse?lat='+latitude+'&lon='+longitude+'&limit=10&appid=18403b04ed7c3c2c59d89a2a42ba33c0',
+            success: function(data){
+            alert(data);
+            }
+         });
+      }
+
+      getGeo() {
+         let geo = navigator.geolocation;
+         console.log(geo);
+         let id = geo.watchPosition((pos) => {
+            const latitude  = pos.coords.latitude;
+            const longitude = pos.coords.longitude;
+            console.log(pos.coords);
+            this.getCityGeo(latitude,longitude);
+            geo.clearWatch(id);
+         }, (err) => console.log(err));
+      }
    }
 
    function start(){
@@ -60,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       view.renderInit();
       controller.addHandle();
+      controller.getGeo();
    }
 
    start();
