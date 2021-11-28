@@ -7,16 +7,31 @@ document.addEventListener("DOMContentLoaded", () => {
    console.log(month);
    let bodyBackGr = $("body");
    console.log(bodyBackGr);
-   if(month === 11 || month === 0 || month === 1) {
-      bodyBackGr.css({'background-image': 'url(winter.jpg)'});
-   } else if (month >=8 && month <= 10) {
-      bodyBackGr.css({'background-image': 'url(autumn.jpg)'});
-   } else if (month >=5 && month <=7) {
-      bodyBackGr.css({'background-image': 'url(summer.jpg)'});
-   } else if (month >=2 && month <=4) {
-      bodyBackGr.css({'background-image': 'url(spring.jpg)'});
-   }
+   switch(month) {
+      case 11:
+      case 0:
+      case 1:
+         bodyBackGr.css({'background-image': 'url(winter.jpg)'});
+      break;
 
+      case 8:
+      case 9:
+      case 10:
+         bodyBackGr.css({'background-image': 'url(autumn.jpg)'});
+      break;
+
+      case 5:
+      case 6:
+      case 7:
+         bodyBackGr.css({'background-image': 'url(summer.jpg)'});
+      break;
+
+      case 2:
+      case 3:
+      case 4:
+         bodyBackGr.css({'background-image': 'url(spring.jpg)'});
+      break;
+   }
 })();
 
 //script end
