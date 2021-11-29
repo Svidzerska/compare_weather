@@ -47,7 +47,31 @@ document.addEventListener("DOMContentLoaded", () => {
          console.log(this.cities);
       }
 
-      
+      addCityToDBPromise(method,cityFromInput) {
+         return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, "http://localhost:3030/cities");
+            xhr.responseType = "json";
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+            xhr.onload = () => {
+               if(xhr.status === 200) {
+                  resolve(xhr.response);
+               } else {
+                  var error = new Error(this.statusText);
+                  error.code = this.status;
+                  reject(error);
+               }
+            }
+   
+            xhr.onerror = () => {
+               reject(new Error("Network Error"));
+            }
+
+            xhr.send(cityFromInput);
+         })
+      }
+
+      //weather from geolocation
       async getWeatherGeo(latitude,longitude) {
          try {
             let result = await fetch('http://api.openweathermap.org/data/2.5/weather?lat='+latitude+'&lon='+longitude+'&appid=18403b04ed7c3c2c59d89a2a42ba33c0');
@@ -65,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
 
+
    }
 
 
@@ -79,6 +104,13 @@ document.addEventListener("DOMContentLoaded", () => {
       addCity() {
          let value = this.view.input.value; 
          this.model.addCityToDB(value); 
+         console.log(value);
+         let valueobj = {
+            name: `${value}`
+         };
+         let valueToDB = JSON.stringify(valueobj);
+         console.log(valueToDB);
+         this.model.addCityToDBPromise("POST", valueToDB).then(data => console.log(data)).catch(err => console.error(err));
          this.view.clearInput();
       }
 
