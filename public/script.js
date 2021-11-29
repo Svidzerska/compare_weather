@@ -52,13 +52,22 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.addButton.addEventListener("click", this.addCity);
       }
 
+      // getCityGeo(latitude,longitude) {
+      //    $.ajax({ url:'http://api.openweathermap.org/geo/1.0/reverse?lat='+latitude+'&lon='+longitude+'&limit=2&appid=18403b04ed7c3c2c59d89a2a42ba33c0',
+      //       success: function(data){
+      //       console.log(data);
+      //       }
+      //    });
+      // }
+
       getCityGeo(latitude,longitude) {
-         $.ajax({ url:'http://api.openweathermap.org/geo/1.0/reverse?lat='+latitude+'&lon='+longitude+'&limit=10&appid=18403b04ed7c3c2c59d89a2a42ba33c0',
+         $.ajax({ url:'http://api.openweathermap.org/data/2.5/weather?lat='+latitude+'&lon='+longitude+'&appid=18403b04ed7c3c2c59d89a2a42ba33c0',
             success: function(data){
-            alert(data);
+            console.log(data);
             }
          });
       }
+
 
       getGeo() {
          let geo = navigator.geolocation;
