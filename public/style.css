@@ -8,6 +8,7 @@ body {
 
 .main {
    display: flex;
+   flex-direction: column;
    vertical-align: bottom;
    width: fit-content;
    margin-left: auto;
@@ -34,6 +35,15 @@ input {
    bottom: 20px;
    left: 20px;
 }
+
+.city_example {
+   display: flex;
+   flex-direction: row;
+   background-color: khaki;
+   justify-content: space-between;
+   margin-top: 10px;
+}
+
 
 
 

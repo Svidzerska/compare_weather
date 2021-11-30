@@ -52,6 +52,17 @@ app.post('/cities', (req,res) => {
    })
 })
 
+app.delete('/cities/:id', (req,res) => {
+   db.collection('cities').deleteOne({_id: ObjectId(req.params.id)}, (err,result) => {
+      if(err) {
+         console.log(err);
+         return res.sendStatus(500);
+      }
+      res.sendStatus(200);
+   })
+})
+
+
 
 client.connect(err => {
    if(err) throw err;

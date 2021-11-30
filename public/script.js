@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
          this.divGeo = document.createElement("div");
          this.divGeo.setAttribute("class","geoFixed");
          this.mainDiv = document.querySelector(".main");
-         
+         this.inputDiv = document.querySelector(".input_field");
       }
    
       renderInit() {
          console.log(this.addButton);
-         this.mainDiv.append(this.input, this.addButton);
+         this.inputDiv.append(this.input, this.addButton);
          this.addButton.innerHTML = "Add";
          this.input.setAttribute("placeholder",`Type your city here...`);
       }
@@ -32,6 +32,18 @@ document.addEventListener("DOMContentLoaded", () => {
          <p>${icon}</p>
          <p>${city}</p>`;
       }
+
+      addCityAndWeather(name,_id) {
+         const divOneCity = document.createElement("div");
+         this.mainDiv.appendChild(divOneCity);
+         divOneCity.setAttribute("class", "city_example")
+         divOneCity.innerHTML = `<p>${name}</p>`;
+         const deleteButton = document.createElement("button");
+         divOneCity.appendChild(deleteButton);
+         deleteButton.setAttribute("id",`${_id}`);
+         deleteButton.innerText = "Delete";
+      }
+
    }
 
    class WeatherModel {
@@ -71,6 +83,44 @@ document.addEventListener("DOMContentLoaded", () => {
          })
       }
 
+      async getCitiesFromDB() {
+         try {
+            let result = await fetch('http://localhost:3030/cities', {
+               method: 'GET'})
+            let json = await result.json();
+            return json;
+         } catch(err) {
+             return err;
+         }
+      }
+
+
+
+      deleteCitiesFromDBPromise(identificator) {
+         return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("DELETE", `http://localhost:3030/cities/${identificator}`);
+            xhr.responseType = "json";
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+            xhr.onload = () => {
+               if(xhr.status === 200) {
+                  resolve(xhr.response);
+               } else {
+                  var error = new Error(this.statusText);
+                  error.code = this.status;
+                  reject(error);
+               }
+            }
+   
+            xhr.onerror = () => {
+               reject(new Error("Network Error"));
+            }
+
+            xhr.send();
+         })
+      }
+
+
       //weather from geolocation
       async getWeatherGeo(latitude,longitude) {
          try {
@@ -99,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view = view;
          this.model = model;
          this.addCity = this.addCity.bind(this);
+         this.deleteAll = this.deleteAll.bind(this);
       }
 
       addCity() {
@@ -110,12 +161,28 @@ document.addEventListener("DOMContentLoaded", () => {
          };
          let valueToDB = JSON.stringify(valueobj);
          console.log(valueToDB);
-         this.model.addCityToDBPromise("POST", valueToDB).then(data => console.log(data)).catch(err => console.error(err));
+         this.model.addCityToDBPromise("POST", valueToDB)
+                           .then(data => this.view.addCityAndWeather(data.name,data._id))
+                           .catch(err => console.error(err));
          this.view.clearInput();
       }
 
       addHandle() {
          this.view.addButton.addEventListener("click", this.addCity);
+      }
+
+      deleteAll(array) {
+         for( let i = 0; i < array.length; i++) {
+            console.log(66666);
+            this.model.deleteCitiesFromDBPromise(array[i]._id);
+         }
+      }
+
+      getCities() {
+         this.model.getCitiesFromDB()
+                        .then(result => result instanceof Error ? 
+                        console.log(result) : 
+                        this.deleteAll(result));                                       
       }
 
       getGeo() {
@@ -142,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       view.renderInit();
       controller.addHandle();
       controller.getGeo();
+      controller.getCities();
    }
 
    start();
