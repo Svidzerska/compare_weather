@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
       addCityAndWeather(name,_id) {
          const divOneCity = document.createElement("div");
          this.taskDiv.appendChild(divOneCity);
-         divOneCity.setAttribute("class", "city_example")
+         divOneCity.setAttribute("class", "city_example");
+         divOneCity.setAttribute("id",`button${_id}`);
          divOneCity.innerHTML = `<p>${name}</p>`;
          const deleteButton = document.createElement("button");
          divOneCity.appendChild(deleteButton);
@@ -52,90 +53,17 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteAllCities() {
          this.taskDiv.innerHTML = "";
       }
+
+      deleteCity(id) {
+         const divOneCity = document.querySelector(`#button${id}`);
+         divOneCity.remove();
+      }
    }
 
    class WeatherModel {
       constructor(view){
          this.view = view;
-      } 
-
-      // addCityToDBPromise(method,cityFromInput) {
-      //    return new Promise((resolve, reject) => {
-      //       const xhr = new XMLHttpRequest();
-      //       xhr.open(method, "http://localhost:3030/cities");
-      //       xhr.responseType = "json";
-      //       xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
-      //       xhr.onload = () => {
-      //          if(xhr.status === 200) {
-      //             resolve(xhr.response);
-      //          } else {
-      //             var error = new Error(this.statusText);
-      //             error.code = this.status;
-      //             reject(error);
-      //          }
-      //       }
-   
-      //       xhr.onerror = () => {
-      //          reject(new Error("Network Error"));
-      //       }
-
-      //       xhr.send(cityFromInput);
-      //    })
-      // }
-
-      // async getCitiesFromDB() {
-      //    try {
-      //       let result = await fetch('http://localhost:3030/cities', {
-      //          method: 'GET'})
-      //       let json = await result.json();
-      //       return json;
-      //    } catch(err) {
-      //        return err;
-      //    }
-      // }
-
-      // deleteCitiesFromDBPromise(identificator) {
-      //    return new Promise((resolve, reject) => {
-      //       const xhr = new XMLHttpRequest();
-      //       xhr.open("DELETE", `http://localhost:3030/cities/${identificator}`);
-      //       xhr.responseType = "json";
-      //       xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
-      //       xhr.onload = () => {
-      //          if(xhr.status === 200) {
-      //             resolve(xhr.response);
-      //          } else {
-      //             var error = new Error(this.statusText);
-      //             error.code = this.status;
-      //             reject(error);
-      //          }
-      //       }
-   
-      //       xhr.onerror = () => {
-      //          reject(new Error("Network Error"));
-      //       }
-
-      //       xhr.send();
-      //    })
-      // }
-
-
-      //weather from geolocation
-      // async getWeatherGeo(latitude,longitude) {
-      //    try {
-      //       let result = await fetch('http://api.openweathermap.org/data/2.5/weather?lat='+latitude+'&lon='+longitude+'&appid=18403b04ed7c3c2c59d89a2a42ba33c0');
-      //       let json = await result.json();
-      //       let temp = json.main.temp;
-      //       let feel_temp = json.main.feels_like;
-      //       let cloud = json.clouds;
-      //       let precipitation = json.weather[0].description;
-      //       let icon = json.weather[0].icon;
-      //       let city = json.name;
-      //       let weather = [temp,feel_temp,cloud,precipitation,icon,city];
-      //       return weather;
-      //    } catch(err) {
-      //        return err;
-      //    }
-      // }
+      }       
    }
 
    class WeatherModelDB extends WeatherModel {
@@ -208,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
          super(view);
       }
 
-      
+
 
 
       //weather from geolocation
@@ -240,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.addCity = this.addCity.bind(this);
          this.deleteAll = this.deleteAll.bind(this);
          this.getCities = this.getCities.bind(this);
+         this.clickDelete = this.clickDelete.bind(this);
       }
 
       addCity() {
@@ -265,7 +194,9 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteAll(array) {
          for( let i = 0; i < array.length; i++) {
             console.log(66666);
+            console.log(array[i]._id);
             this.modelDB.deleteCitiesFromDBPromise(array[i]._id);
+         
          }
          this.view.deleteAllCities();
       }
@@ -279,6 +210,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       deleteAllHandle() {
          this.view.deleteAllButton.addEventListener("click", this.getCities);
+      }
+
+      clickDelete(e) {
+         if (e.target.className !== "city_example") {
+            const button = e.target;
+            console.log(button.id);
+            this.modelDB.deleteCitiesFromDBPromise(button.id);
+            this.view.deleteCity(button.id);
+         }
+      }
+
+      deleteTask() {
+         this.view.taskDiv.addEventListener("click", this.clickDelete);
       }
 
       getGeo() {
@@ -307,6 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
       handle(){
          this.controller.addHandle();
          this.controller.deleteAllHandle();
+         this.controller.deleteTask();
       }
 
       init() {
