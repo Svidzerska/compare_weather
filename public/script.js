@@ -208,6 +208,8 @@ document.addEventListener("DOMContentLoaded", () => {
          super(view);
       }
 
+      
+
 
       //weather from geolocation
       async getWeatherGeo(latitude,longitude) {
@@ -259,10 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.addButton.addEventListener("click", this.addCity);
       }
 
-      deleteAllHandle() {
-         this.view.deleteAllButton.addEventListener("click", this.getCities);
-      }
-
+      
       deleteAll(array) {
          for( let i = 0; i < array.length; i++) {
             console.log(66666);
@@ -276,6 +275,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         .then(result => result instanceof Error ? 
                         console.log(result) : 
                         this.deleteAll(result));                                       
+      }
+
+      deleteAllHandle() {
+         this.view.deleteAllButton.addEventListener("click", this.getCities);
       }
 
       getGeo() {
@@ -294,18 +297,41 @@ document.addEventListener("DOMContentLoaded", () => {
       }   
    }
 
+
+   class Facade {
+      constructor(view,controller) {
+         this.view = view;
+         this.controller = controller;
+      }
+
+      handle(){
+         this.controller.addHandle();
+         this.controller.deleteAllHandle();
+      }
+
+      init() {
+         this.controller.getGeo();
+         this.view.renderInit();
+      }
+
+
+   }
+
    function start(){
       let view = new WeatherView();
       // let model = new WeatherModel(view);
       let modelDB = new WeatherModelDB(view);
       let modelW = new WeatherModelGetWeather(view);
       let controller = new WeatherController(view,modelDB,modelW);
+      let facade = new Facade(view,controller);
 
-      view.renderInit();
-      controller.addHandle();
-      controller.deleteAllHandle();
-      controller.getGeo();
+      
+      facade.init();
+      facade.handle();
    }
+
+
+   
 
    start();
 
