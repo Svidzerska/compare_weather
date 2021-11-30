@@ -171,9 +171,23 @@ document.addEventListener("DOMContentLoaded", () => {
          this.clickDelete = this.clickDelete.bind(this);
       }
 
+      renderInitCity(array) {
+         for( let i = 0; i < array.length; i++) {
+            console.log(66666);
+            console.log(array[i]._id);
+            this.view.addCityAndWeather(array[i].name,array[i]._id);
+         }
+      }
+      
+      initCity() {
+         this.modelDB.getCitiesFromDB()
+                        .then(result => result instanceof Error ? 
+                        console.log(result) : 
+                        this.renderInitCity(result));    
+      }
+
       addCity() {
          let value = this.view.input.value; 
-         // this.model.addCityToDB(value); 
          console.log(value);
          let valueobj = {
             name: `${value}`
@@ -257,6 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
       init() {
          this.controller.getGeo();
          this.view.renderInit();
+         this.controller.initCity();
       }
 
 
