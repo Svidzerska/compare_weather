@@ -44,6 +44,13 @@ input {
    margin-top: 10px;
 }
 
+#delete_all {
+   background-color: ivory;
+   position: fixed;
+   bottom: 20px;
+   right: 20px;
+}
+
 
 
 

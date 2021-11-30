@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
          this.divGeo.setAttribute("class","geoFixed");
          this.mainDiv = document.querySelector(".main");
          this.inputDiv = document.querySelector(".input_field");
+         this.deleteAllButton = document.createElement("button");
+         this.taskDiv = document.querySelector(".tasks");
       }
    
       renderInit() {
@@ -17,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
          this.inputDiv.append(this.input, this.addButton);
          this.addButton.innerHTML = "Add";
          this.input.setAttribute("placeholder",`Type your city here...`);
+         this.mainDiv.appendChild(this.deleteAllButton);
+         this.deleteAllButton.setAttribute("id","delete_all");
+         this.deleteAllButton.innerText = "Delete All Cities";
       }
 
       clearInput() {
@@ -35,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       addCityAndWeather(name,_id) {
          const divOneCity = document.createElement("div");
-         this.mainDiv.appendChild(divOneCity);
+         this.taskDiv.appendChild(divOneCity);
          divOneCity.setAttribute("class", "city_example")
          divOneCity.innerHTML = `<p>${name}</p>`;
          const deleteButton = document.createElement("button");
@@ -44,19 +49,98 @@ document.addEventListener("DOMContentLoaded", () => {
          deleteButton.innerText = "Delete";
       }
 
+      deleteAllCities() {
+         this.taskDiv.innerHTML = "";
+      }
    }
 
    class WeatherModel {
       constructor(view){
-         this.cities = [];
          this.view = view;
-         // this.getCityGeo = this.getCityGeo.bind(this);
-         this.getWeatherGeo = this.getWeatherGeo.bind(this);
       } 
 
-      addCityToDB(value) {
-         this.cities.push(value);
-         console.log(this.cities);
+      // addCityToDBPromise(method,cityFromInput) {
+      //    return new Promise((resolve, reject) => {
+      //       const xhr = new XMLHttpRequest();
+      //       xhr.open(method, "http://localhost:3030/cities");
+      //       xhr.responseType = "json";
+      //       xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+      //       xhr.onload = () => {
+      //          if(xhr.status === 200) {
+      //             resolve(xhr.response);
+      //          } else {
+      //             var error = new Error(this.statusText);
+      //             error.code = this.status;
+      //             reject(error);
+      //          }
+      //       }
+   
+      //       xhr.onerror = () => {
+      //          reject(new Error("Network Error"));
+      //       }
+
+      //       xhr.send(cityFromInput);
+      //    })
+      // }
+
+      // async getCitiesFromDB() {
+      //    try {
+      //       let result = await fetch('http://localhost:3030/cities', {
+      //          method: 'GET'})
+      //       let json = await result.json();
+      //       return json;
+      //    } catch(err) {
+      //        return err;
+      //    }
+      // }
+
+      // deleteCitiesFromDBPromise(identificator) {
+      //    return new Promise((resolve, reject) => {
+      //       const xhr = new XMLHttpRequest();
+      //       xhr.open("DELETE", `http://localhost:3030/cities/${identificator}`);
+      //       xhr.responseType = "json";
+      //       xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+      //       xhr.onload = () => {
+      //          if(xhr.status === 200) {
+      //             resolve(xhr.response);
+      //          } else {
+      //             var error = new Error(this.statusText);
+      //             error.code = this.status;
+      //             reject(error);
+      //          }
+      //       }
+   
+      //       xhr.onerror = () => {
+      //          reject(new Error("Network Error"));
+      //       }
+
+      //       xhr.send();
+      //    })
+      // }
+
+
+      //weather from geolocation
+      // async getWeatherGeo(latitude,longitude) {
+      //    try {
+      //       let result = await fetch('http://api.openweathermap.org/data/2.5/weather?lat='+latitude+'&lon='+longitude+'&appid=18403b04ed7c3c2c59d89a2a42ba33c0');
+      //       let json = await result.json();
+      //       let temp = json.main.temp;
+      //       let feel_temp = json.main.feels_like;
+      //       let cloud = json.clouds;
+      //       let precipitation = json.weather[0].description;
+      //       let icon = json.weather[0].icon;
+      //       let city = json.name;
+      //       let weather = [temp,feel_temp,cloud,precipitation,icon,city];
+      //       return weather;
+      //    } catch(err) {
+      //        return err;
+      //    }
+      // }
+   }
+
+   class WeatherModelDB extends WeatherModel {
+      constructor(view) {
+         super(view);
       }
 
       addCityToDBPromise(method,cityFromInput) {
@@ -94,8 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
 
-
-
       deleteCitiesFromDBPromise(identificator) {
          return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -119,6 +201,12 @@ document.addEventListener("DOMContentLoaded", () => {
             xhr.send();
          })
       }
+   }
+
+   class WeatherModelGetWeather extends WeatherModel {
+      constructor(view) {
+         super(view);
+      }
 
 
       //weather from geolocation
@@ -138,30 +226,30 @@ document.addEventListener("DOMContentLoaded", () => {
              return err;
          }
       }
-
-
    }
 
 
 
    class WeatherController {
-      constructor(view,model) {
+      constructor(view,modelDB,modelW) {
          this.view = view;
-         this.model = model;
+         this.modelDB = modelDB;
+         this.modelW = modelW;
          this.addCity = this.addCity.bind(this);
          this.deleteAll = this.deleteAll.bind(this);
+         this.getCities = this.getCities.bind(this);
       }
 
       addCity() {
          let value = this.view.input.value; 
-         this.model.addCityToDB(value); 
+         // this.model.addCityToDB(value); 
          console.log(value);
          let valueobj = {
             name: `${value}`
          };
          let valueToDB = JSON.stringify(valueobj);
          console.log(valueToDB);
-         this.model.addCityToDBPromise("POST", valueToDB)
+         this.modelDB.addCityToDBPromise("POST", valueToDB)
                            .then(data => this.view.addCityAndWeather(data.name,data._id))
                            .catch(err => console.error(err));
          this.view.clearInput();
@@ -171,15 +259,20 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.addButton.addEventListener("click", this.addCity);
       }
 
+      deleteAllHandle() {
+         this.view.deleteAllButton.addEventListener("click", this.getCities);
+      }
+
       deleteAll(array) {
          for( let i = 0; i < array.length; i++) {
             console.log(66666);
-            this.model.deleteCitiesFromDBPromise(array[i]._id);
+            this.modelDB.deleteCitiesFromDBPromise(array[i]._id);
          }
+         this.view.deleteAllCities();
       }
 
       getCities() {
-         this.model.getCitiesFromDB()
+         this.modelDB.getCitiesFromDB()
                         .then(result => result instanceof Error ? 
                         console.log(result) : 
                         this.deleteAll(result));                                       
@@ -192,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const latitude  = pos.coords.latitude;
             const longitude = pos.coords.longitude;
             console.log(pos.coords);
-            this.model.getWeatherGeo(latitude,longitude)
+            this.modelW.getWeatherGeo(latitude,longitude)
                         .then(result => result instanceof Error ? 
                         console.log(result) : 
                         this.view.addWeatherGeo(result[0],result[1],result[2],result[3],result[4],result[5],result[6]));                                       
@@ -203,13 +296,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
    function start(){
       let view = new WeatherView();
-      let model = new WeatherModel(view);
-      let controller = new WeatherController(view,model);
+      // let model = new WeatherModel(view);
+      let modelDB = new WeatherModelDB(view);
+      let modelW = new WeatherModelGetWeather(view);
+      let controller = new WeatherController(view,modelDB,modelW);
 
       view.renderInit();
       controller.addHandle();
+      controller.deleteAllHandle();
       controller.getGeo();
-      controller.getCities();
    }
 
    start();
