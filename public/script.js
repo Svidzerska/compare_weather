@@ -136,7 +136,16 @@ document.addEventListener("DOMContentLoaded", () => {
          super(view);
       }
 
-
+      //weather by city
+      async getWeatherCity(method,city) {
+         try {
+            let result = await fetch('https://api.openweathermap.org/data/2.5/weather?q='+city+'&appid=18403b04ed7c3c2c59d89a2a42ba33c0');
+            let json = await result.json();
+            return json;
+         } catch(err) {
+             return err;
+         }
+      }
 
 
       //weather from geolocation
@@ -169,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.deleteAll = this.deleteAll.bind(this);
          this.getCities = this.getCities.bind(this);
          this.clickDelete = this.clickDelete.bind(this);
+         this.findWeatherCity = this.findWeatherCity.bind(this);
       }
 
       renderInitCity(array) {
@@ -184,6 +194,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         .then(result => result instanceof Error ? 
                         console.log(result) : 
                         this.renderInitCity(result));    
+      }
+
+      
+      findWeatherCity() {
+         console.log(this.view.input.value);
+         this.modelW.getWeatherCity("GET", this.view.input.value)
+                                          .then(data => console.log(data))
+                                          .catch(err => console.error(err));
+      }
+
+      inputHandle() {
+         this.view.input.addEventListener("input", this.findWeatherCity);
       }
 
       addCity() {
@@ -272,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.controller.getGeo();
          this.view.renderInit();
          this.controller.initCity();
+         this.controller.inputHandle();
       }
 
 
