@@ -13,7 +13,7 @@ body {
    width: fit-content;
    margin-left: auto;
    margin-right: auto;
-   padding-top: 50px;
+   padding-top: 60px;
    
 }
 
@@ -50,6 +50,15 @@ input {
    bottom: 20px;
    right: 20px;
 }
+
+.possible_city {
+   position: fixed;
+   top: 20px;
+   left: 20px;
+   background-color: lemonchiffon;
+   font-size: 20px;
+}
+
 
 
 

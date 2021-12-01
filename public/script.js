@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.inputDiv = document.querySelector(".input_field");
          this.deleteAllButton = document.createElement("button");
          this.taskDiv = document.querySelector(".tasks");
+         this.divQuestion = document.createElement("div");
       }
    
       renderInit() {
@@ -27,6 +28,20 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInput() {
          this.input.value = "";
       }
+
+      questionInput(data) {
+         this.inputDiv.appendChild(this.divQuestion);
+         this.divQuestion.setAttribute("class", "possible_city");
+         this.divQuestion.innerText = `${data.name},${data.sys.country},${data.coord.lat},${data.coord.lon}`;
+
+      }
+
+      errorInput(data) {
+         this.inputDiv.appendChild(this.divQuestion);
+         this.divQuestion.setAttribute("class", "possible_city");
+         this.divQuestion.innerText = `${data.message}`;
+      }
+   
 
       addWeatherGeo(temperature,feel_temperature,cloud,precipitation,icon,city) {
          this.mainDiv.appendChild(this.divGeo);
@@ -179,6 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
          this.getCities = this.getCities.bind(this);
          this.clickDelete = this.clickDelete.bind(this);
          this.findWeatherCity = this.findWeatherCity.bind(this);
+         this.addHandle = this.addHandle.bind(this);
+         this.addHandleRemove = this.addHandleRemove.bind(this);
       }
 
       renderInitCity(array) {
@@ -200,7 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
       findWeatherCity() {
          console.log(this.view.input.value);
          this.modelW.getWeatherCity("GET", this.view.input.value)
-                                          .then(data => console.log(data))
+                                          .then(data => {
+                                             console.log(data);
+                                             if (data.cod === 200) {
+                                                this.view.questionInput(data);
+                                                this.addHandle();
+                                             } else if (data.cod === '404') {
+                                                this.view.errorInput(data);
+                                                this.addHandleRemove();
+                                             }
+                                             
+                                          })
                                           .catch(err => console.error(err));
       }
 
@@ -220,6 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
                            .then(data => this.view.addCityAndWeather(data.name,data._id))
                            .catch(err => console.error(err));
          this.view.clearInput();
+      }
+
+      addHandleRemove() {
+         this.view.addButton.removeEventListener("click", this.addCity);
       }
 
       addHandle() {
@@ -285,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       handle(){
-         this.controller.addHandle();
+         // this.controller.addHandle();
          this.controller.deleteAllHandle();
          this.controller.deleteTask();
       }
