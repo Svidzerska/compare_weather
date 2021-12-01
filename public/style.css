@@ -61,6 +61,11 @@ input {
    margin-top: 10px;
 }
 
+.city_example > div:last-child {
+   display: flex;
+   flex-direction: row;
+}
+
 #delete_all {
    background-color: ivory;
    position: fixed;

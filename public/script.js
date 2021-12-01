@@ -56,16 +56,25 @@ document.addEventListener("DOMContentLoaded", () => {
          `;
       }
 
-      addCityAndWeather(name,_id,temp) {
+      addCityAndWeather(name,_id,temp,weather_main) {
          const divOneCity = document.createElement("div");
          this.taskDiv.appendChild(divOneCity);
          divOneCity.setAttribute("class", "city_example");
          divOneCity.setAttribute("id",`button${_id}`);
-         divOneCity.innerHTML = `<p>${name}${temp}</p>`;
+         divOneCity.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+
+         const divTaskButtons = document.createElement("div");
+         divOneCity.appendChild(divTaskButtons);
+         const editButton = document.createElement("button");
+         divTaskButtons.appendChild(editButton);
+         editButton.setAttribute("id",`edit${_id}`);
+         editButton.innerText = "Edit City";
+
          const deleteButton = document.createElement("button");
-         divOneCity.appendChild(deleteButton);
+         divTaskButtons.appendChild(deleteButton);
          deleteButton.setAttribute("id",`${_id}`);
          deleteButton.innerText = "Delete";
+         
       }
 
       
@@ -208,7 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
          for( let i = 0; i < array.length; i++) {
             console.log(66666);
             console.log(array[i]._id);
-            this.view.addCityAndWeather(array[i].name,array[i]._id);
+            console.log(array[i].name);
+            this.modelW.getWeatherCity("GET", array[i].name)
+                                          .then(data => {
+                                             console.log(data);
+                                             this.mediator.collection(data);
+                                             this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.weather[0].main)
+                                          })
+                                          .catch(err => console.error(err));
+
+
+            // this.view.addCityAndWeather(array[i].name,array[i]._id);
          }
       }
       
@@ -254,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.modelDB.addCityToDBPromise("POST", valueToDB)
                            .then(data => {
                               // this.view.addCityAndWeather(data.name,data._id)
+                              // this.mediator.collection(data);
                               console.log(data);
                               this.showWeather(data.name,data._id);
                            })
@@ -263,10 +283,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       showWeather(name,_id) {
+      //new request to show present weather!
          this.modelW.getWeatherCity("GET", name)
                                           .then(data => {
                                              console.log(data);
-                                             this.view.addCityAndWeather(name,_id,data.main.temp)
+                                             this.mediator.collection(data);
+                                             this.view.addCityAndWeather(name,_id,data.main.temp,data.weather[0].main)
                                           })
                                           .catch(err => console.error(err));
       }
@@ -366,6 +388,10 @@ document.addEventListener("DOMContentLoaded", () => {
          if (this.functionDone[this.functionDone.length-1] !== undefined) {
             return true;
          }
+      }
+
+      collection(data) {
+         console.log(data);
       }
    }
 
