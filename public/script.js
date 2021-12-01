@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
          this.input.value = "";
       }
 
+      clearInputEdit() {
+         this.inputEdit.value = "";
+      }
+
       questionInput(data) {
          this.inputDiv.appendChild(this.divQuestion);
          this.divQuestion.setAttribute("class", "possible_city");
@@ -65,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.taskDiv.appendChild(divOneCity);
          divOneCity.setAttribute("class", "city_example");
          divOneCity.setAttribute("id",`button${_id}`);
-         divOneCity.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+         divOneCity.innerHTML = `<div id="weather_zone${_id}"><p>${name} ${temp} ${weather_main}</p></div>`;
 
          const divTaskButtons = document.createElement("div");
          divOneCity.appendChild(divTaskButtons);
@@ -85,13 +89,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       goFromEditTask(name,_id,temp,weather_main) {
          console.log(_id); //this is new id, but we need old
-         const divOneCity = document.querySelector(`#button${_id}`);
-         console.log(divOneCity);
-         divOneCity.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+         const divWeatherZone = document.querySelector(`#weather_zone${_id}`);
+         console.log(divWeatherZone);
+         divWeatherZone.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+         
+         const divInputZone = document.querySelector(`#input_zone${_id}`);
+         divInputZone.remove();
       }
 
 
       editTask(button_id,name) {
+         this.inputEdit.setAttribute("value", `${name}`);
+
          console.log(button_id);
          const button_idToArr = button_id.split("");
          const b = button_idToArr.splice(0,4,);
@@ -101,9 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
          console.log(buttonEditId);
          const divOneCity = document.querySelector(`#button${buttonEditId}`);
          divOneCity.append(this.inputEditDiv);
+         this.inputEditDiv.setAttribute("id", `input_zone${buttonEditId}`);
          this.inputEditDiv.append(this.inputEdit, this.inputEditButton);
          this.inputEditButton.innerText = "Go";
-         this.inputEdit.setAttribute("value", `${name}`);
+         this.inputEditButton.setAttribute("id",`go${buttonEditId}`);
 
          // const editButton = document.querySelector(`#${button_id}`);
          // editButton.remove();
@@ -152,6 +162,31 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             xhr.send(cityFromInput);
+         })
+      }
+
+
+      goCityToDBPromise(method,cityFromInputEdit,id) {
+         return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, `http://localhost:3030/cities/${id}`);
+            xhr.responseType = "text";
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            xhr.onload = () => {
+               if(xhr.status === 200) {
+                  resolve(xhr.response);
+               } else {
+                  var error = new Error(this.statusText);
+                  error.code = this.status;
+                  reject(error);
+               }
+            }
+
+            xhr.onerror = () => {
+               reject(new Error("Network Error"));
+            }
+
+            xhr.send(cityFromInputEdit);
          })
       }
 
@@ -259,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.goHandle = this.goHandle.bind(this);
          this.goHandleRemove = this.goHandleRemove.bind(this);
          this.showWeather = this.showWeather.bind(this);
+         this.inputEditHandleRemove = this.inputEditHandleRemove.bind(this);
       }
 
       renderInitCity(array) {
@@ -307,7 +343,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       findWeatherCityEdit() {
-         console.log(this.view.input.value);
+         //при инпуте в инпут вносятся новые данные и там остаются, поскольку инпут один
+         console.log(this.view.inputEdit.value);
          this.modelW.getWeatherCity("GET", this.view.inputEdit.value)
                                           .then(data => {
                                              console.log(data);
@@ -321,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                                 if (this.mediator.done() === true) {
                                                    this.goHandleRemove();
                                                 }
-                                             } 
+                                             }
                                           })
                                           .catch(err => console.error(err));
       }
@@ -334,6 +371,11 @@ document.addEventListener("DOMContentLoaded", () => {
       inputEditHandle() {
          this.view.inputEdit.addEventListener("input", this.findWeatherCityEdit);
       }
+
+      inputEditHandleRemove() {
+         this.view.inputEdit.removeEventListener("input", this.findWeatherCityEdit);
+      }
+
 
       addCity() {
          this.addHandleRemove();
@@ -355,25 +397,36 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.clearInput();
       }
 
-      goCity() {
+      goCity(e) {
          this.goHandleRemove();
          let value = this.view.inputEdit.value;
          console.log(value);
+
+
+         let button_id = e.target.id;
+         const button_idToArr = button_id.split("");
+         const b = button_idToArr.splice(0,2,);
+         //edit button id
+         const buttonEditId = button_idToArr.join("");
+         console.log(buttonEditId);
+
          let valueobj = {
             name: `${value}`
          };
          let valueToDB = JSON.stringify(valueobj);
          console.log(valueToDB);
-         this.modelDB.addCityToDBPromise("POST", valueToDB)
+         this.modelDB.goCityToDBPromise("PUT", valueToDB, buttonEditId)
                            .then(data => {
                               // this.view.addCityAndWeather(data.name,data._id)
                               // this.mediator.collect(data);
                               console.log(data);
+                              // console.log();
+
                               //GOOOOOOOOOOO
-                              this.showEditWeather(data.name,data._id);
+                              this.showEditWeather(data,buttonEditId);
                            })
                            .catch(err => console.error(err));
-         this.view.clearInput();
+         this.view.clearInputEdit();
       }
 
 
@@ -410,11 +463,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       goHandleRemove() {
+         // Go press
          this.view.inputEditButton.removeEventListener("click", this.goCity);
       }
 
 
       goHandle() {
+         // Go press
          this.view.inputEditButton.addEventListener("click", this.goCity);
       }
 
@@ -447,7 +502,8 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelDB.deleteCitiesFromDBPromise(button.id);
             this.view.deleteCity(button.id);
          } else if (e.target.className === "edit_task_button") {
-            console.log("edit");
+            // this.view.clearInputEdit();
+            console.log("new new edit");
             const button = e.target;
             console.log(button.id);
 
@@ -461,10 +517,10 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelDB.getCityById(buttonEditId)
                                           .then(data => {
                                              this.view.editTask(button.id,data.name);
+                                             this.inputEditHandle();
                                              console.log(data);
                                           })
                                           .catch(err => console.error(err));
-
          }
       }
 
@@ -505,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.renderInit();
          this.controller.initCity();
          this.controller.inputHandle();
-         this.controller.inputEditHandle();
+         // this.controller.inputEditHandle();
       }
    }
 

@@ -63,6 +63,17 @@ app.post('/cities', (req,res) => {
    })
 })
 
+
+app.put('/cities/:id', (req,res) => {
+   db.collection('cities').updateOne({_id: ObjectId(req.params.id)}, {$set:{name:req.body.name}}, (err,result) => {
+      if(err) {
+         console.log(err);
+         return res.sendStatus(500);
+      }
+      res.send(req.body.name);
+   })
+})
+
 app.delete('/cities/:id', (req,res) => {
    db.collection('cities').deleteOne({_id: ObjectId(req.params.id)}, (err,result) => {
       if(err) {
