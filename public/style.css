@@ -30,10 +30,27 @@ input {
 }
 
 .geoFixed {
-   background-color: ivory;
+   background-color: rgb(255, 255, 223);
    position: fixed;
    bottom: 20px;
    left: 20px;
+   padding: 10px;
+   border: 1px solid rgb(255, 255, 223);
+   border-radius: 25px;
+}
+
+
+.geoFixed > div:first-child {
+   font-size: 20px;
+}
+
+.geoFixed > div:nth-child(2) {
+   display: flex;
+   flex-direction: row;
+}
+
+.geoFixed > div:nth-child(2) > div > p:first-child {
+   font-size: 20px;
 }
 
 .city_example {

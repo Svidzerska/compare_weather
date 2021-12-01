@@ -45,12 +45,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       addWeatherGeo(temperature,feel_temperature,cloud,precipitation,icon,city) {
          this.mainDiv.appendChild(this.divGeo);
-         this.divGeo.innerHTML = `<p>${temperature}</p>
-         <p>${feel_temperature}</p>
-         <p>${cloud}</p>
-         <p>${precipitation}</p>
-         <p>${icon}</p>
-         <p>${city}</p>`;
+         const tempC = Math.round(+temperature - 273.15);
+         const tempfeelC = Math.round(+feel_temperature - 273.15);
+         const tempF = Math.round(tempC*1.8 + 32); 
+         const tempfeelF = Math.round(tempfeelC*1.8 + 32); 
+         this.divGeo.innerHTML = `<div><p>Where you are</p></div>
+         <div><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${precipitation}"><div><p>${tempC} &#176;C / ${tempF} F </p><p>feels like:<br>${tempfeelC} &#176;C / ${tempfeelF} F</p></div></div>
+         <div><p>${precipitation}</p></div>
+         <div><p>${city}</p></div>
+         `;
       }
 
       addCityAndWeather(name,_id) {
