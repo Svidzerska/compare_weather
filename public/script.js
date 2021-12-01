@@ -82,6 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
          deleteButton.innerText = "Delete";
       }
 
+
+      goFromEditTask(name,_id,temp,weather_main) {
+         console.log(_id); //this is new id, but we need old
+         const divOneCity = document.querySelector(`#button${_id}`);
+         console.log(divOneCity);
+         divOneCity.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+      }
+
+
       editTask(button_id,name) {
          console.log(button_id);
          const button_idToArr = button_id.split("");
@@ -239,12 +248,16 @@ document.addEventListener("DOMContentLoaded", () => {
          this.modelW = modelW;
          this.mediator = mediator;
          this.addCity = this.addCity.bind(this);
+         this.goCity = this.goCity.bind(this);
          this.deleteAll = this.deleteAll.bind(this);
          this.getCities = this.getCities.bind(this);
          this.clickTask = this.clickTask.bind(this);
          this.findWeatherCity = this.findWeatherCity.bind(this);
+         this.findWeatherCityEdit = this.findWeatherCityEdit.bind(this);
          this.addHandle = this.addHandle.bind(this);
          this.addHandleRemove = this.addHandleRemove.bind(this);
+         this.goHandle = this.goHandle.bind(this);
+         this.goHandleRemove = this.goHandleRemove.bind(this);
          this.showWeather = this.showWeather.bind(this);
       }
 
@@ -256,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelW.getWeatherCity("GET", array[i].name)
                                           .then(data => {
                                              console.log(data);
-                                             // this.mediator.collection(data);
                                              this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.weather[0].main)
                                           })
                                           .catch(err => console.error(err));
@@ -280,6 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                           .then(data => {
                                              console.log(data);
                                              if (data.cod === 200) {
+                                                console.log("999999999999999999999");
                                                 this.view.questionInput(data);
                                                 this.mediator.subscribe(this.addHandle);
                                                 this.addHandle();
@@ -288,7 +301,27 @@ document.addEventListener("DOMContentLoaded", () => {
                                                 if (this.mediator.done() === true) {
                                                    this.addHandleRemove();
                                                 }
-                                             }
+                                             } 
+                                          })
+                                          .catch(err => console.error(err));
+      }
+
+      findWeatherCityEdit() {
+         console.log(this.view.input.value);
+         this.modelW.getWeatherCity("GET", this.view.inputEdit.value)
+                                          .then(data => {
+                                             console.log(data);
+                                             if (data.cod === 200) {
+                                                console.log("999999999999999999999");
+                                                this.view.questionInput(data);
+                                                this.mediator.subscribe(this.goHandle);
+                                                this.goHandle();
+                                             } else if (data.cod === '404') {
+                                                this.view.errorInput(data);
+                                                if (this.mediator.done() === true) {
+                                                   this.goHandleRemove();
+                                                }
+                                             } 
                                           })
                                           .catch(err => console.error(err));
       }
@@ -297,7 +330,13 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.input.addEventListener("input", this.findWeatherCity);
       }
 
+
+      inputEditHandle() {
+         this.view.inputEdit.addEventListener("input", this.findWeatherCityEdit);
+      }
+
       addCity() {
+         this.addHandleRemove();
          let value = this.view.input.value;
          console.log(value);
          let valueobj = {
@@ -316,6 +355,27 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.clearInput();
       }
 
+      goCity() {
+         this.goHandleRemove();
+         let value = this.view.inputEdit.value;
+         console.log(value);
+         let valueobj = {
+            name: `${value}`
+         };
+         let valueToDB = JSON.stringify(valueobj);
+         console.log(valueToDB);
+         this.modelDB.addCityToDBPromise("POST", valueToDB)
+                           .then(data => {
+                              // this.view.addCityAndWeather(data.name,data._id)
+                              // this.mediator.collect(data);
+                              console.log(data);
+                              //GOOOOOOOOOOO
+                              this.showEditWeather(data.name,data._id);
+                           })
+                           .catch(err => console.error(err));
+         this.view.clearInput();
+      }
+
 
       showWeather(name,_id) {
       //new request to show present weather!
@@ -328,6 +388,17 @@ document.addEventListener("DOMContentLoaded", () => {
                                           .catch(err => console.error(err));
       }
 
+      showEditWeather(name,_id) {
+         //new request to show present weather!
+            this.modelW.getWeatherCity("GET", name)
+                                             .then(data => {
+                                                console.log(data);
+                                                this.view.goFromEditTask(name,_id,data.main.temp,data.weather[0].main)
+                                             })
+                                             .catch(err => console.error(err));
+      }
+
+
       addHandleRemove() {
          this.view.addButton.removeEventListener("click", this.addCity);
       }
@@ -335,6 +406,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       addHandle() {
          this.view.addButton.addEventListener("click", this.addCity);
+      }
+
+
+      goHandleRemove() {
+         this.view.inputEditButton.removeEventListener("click", this.goCity);
+      }
+
+
+      goHandle() {
+         this.view.inputEditButton.addEventListener("click", this.goCity);
       }
 
 
@@ -424,6 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.renderInit();
          this.controller.initCity();
          this.controller.inputHandle();
+         this.controller.inputEditHandle();
       }
    }
 
