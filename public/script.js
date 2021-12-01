@@ -185,10 +185,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
    class WeatherController {
-      constructor(view,modelDB,modelW) {
+      constructor(view,modelDB,modelW,mediator) {
          this.view = view;
          this.modelDB = modelDB;
          this.modelW = modelW;
+         this.mediator = mediator;
          this.addCity = this.addCity.bind(this);
          this.deleteAll = this.deleteAll.bind(this);
          this.getCities = this.getCities.bind(this);
@@ -221,12 +222,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                              console.log(data);
                                              if (data.cod === 200) {
                                                 this.view.questionInput(data);
+                                                this.mediator.subscribe(this.addHandle);
                                                 this.addHandle();
                                              } else if (data.cod === '404') {
-                                                this.view.errorInput(data);
-                                                this.addHandleRemove();
+                                                if (this.mediator.done() === true) {
+                                                   this.view.errorInput(data);
+                                                   this.addHandleRemove();
+                                                }
                                              }
-                                             
                                           })
                                           .catch(err => console.error(err));
       }
@@ -316,7 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       handle(){
-         // this.controller.addHandle();
          this.controller.deleteAllHandle();
          this.controller.deleteTask();
       }
@@ -327,8 +329,24 @@ document.addEventListener("DOMContentLoaded", () => {
          this.controller.initCity();
          this.controller.inputHandle();
       }
+   }
 
 
+   class Mediator {
+      constructor() {
+         this.functionDone = [];
+      }
+
+      subscribe(user) {
+         this.functionDone.splice(0,1,user);
+         console.log(this.functionDone);
+      }
+
+      done() {
+         if (this.functionDone[this.functionDone.length-1] !== undefined) {
+            return true;
+         }
+      }
    }
 
    function start(){
@@ -336,8 +354,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // let model = new WeatherModel(view);
       let modelDB = new WeatherModelDB(view);
       let modelW = new WeatherModelGetWeather(view);
-      let controller = new WeatherController(view,modelDB,modelW);
+      let mediator = new Mediator();
+      let controller = new WeatherController(view,modelDB,modelW,mediator);
       let facade = new Facade(view,controller);
+      
 
       
       facade.init();
