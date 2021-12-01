@@ -56,18 +56,19 @@ document.addEventListener("DOMContentLoaded", () => {
          `;
       }
 
-      addCityAndWeather(name,_id) {
+      addCityAndWeather(name,_id,temp) {
          const divOneCity = document.createElement("div");
          this.taskDiv.appendChild(divOneCity);
          divOneCity.setAttribute("class", "city_example");
          divOneCity.setAttribute("id",`button${_id}`);
-         divOneCity.innerHTML = `<p>${name}</p>`;
+         divOneCity.innerHTML = `<p>${name}${temp}</p>`;
          const deleteButton = document.createElement("button");
          divOneCity.appendChild(deleteButton);
          deleteButton.setAttribute("id",`${_id}`);
          deleteButton.innerText = "Delete";
       }
 
+      
       deleteAllCities() {
          this.taskDiv.innerHTML = "";
       }
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.findWeatherCity = this.findWeatherCity.bind(this);
          this.addHandle = this.addHandle.bind(this);
          this.addHandleRemove = this.addHandleRemove.bind(this);
+         this.showWeather = this.showWeather.bind(this);
       }
 
       renderInitCity(array) {
@@ -228,8 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                                 this.mediator.subscribe(this.addHandle);
                                                 this.addHandle();
                                              } else if (data.cod === '404') {
+                                                this.view.errorInput(data);
                                                 if (this.mediator.done() === true) {
-                                                   this.view.errorInput(data);
                                                    this.addHandleRemove();
                                                 }
                                              }
@@ -250,15 +252,30 @@ document.addEventListener("DOMContentLoaded", () => {
          let valueToDB = JSON.stringify(valueobj);
          console.log(valueToDB);
          this.modelDB.addCityToDBPromise("POST", valueToDB)
-                           .then(data => this.view.addCityAndWeather(data.name,data._id))
+                           .then(data => {
+                              // this.view.addCityAndWeather(data.name,data._id)
+                              console.log(data);
+                              this.showWeather(data.name,data._id);
+                           })
                            .catch(err => console.error(err));
          this.view.clearInput();
+      }
+
+
+      showWeather(name,_id) {
+         this.modelW.getWeatherCity("GET", name)
+                                          .then(data => {
+                                             console.log(data);
+                                             this.view.addCityAndWeather(name,_id,data.main.temp)
+                                          })
+                                          .catch(err => console.error(err));
       }
 
       addHandleRemove() {
          this.view.addButton.removeEventListener("click", this.addCity);
       }
 
+      
       addHandle() {
          this.view.addButton.addEventListener("click", this.addCity);
       }
