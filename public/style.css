@@ -53,6 +53,10 @@ input {
    font-size: 20px;
 }
 
+.geoFixed img {
+   object-fit: contain;
+}
+
 .city_example {
    display: flex;
    flex-direction: row;
@@ -61,9 +65,16 @@ input {
    margin-top: 10px;
 }
 
-.city_example > div:last-child {
+
+
+.city_example > div {
    display: flex;
    flex-direction: row;
+   align-items: center;
+}
+
+.city_example > div > button {
+   height: 40px;
 }
 
 #delete_all {

@@ -13,8 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
          this.deleteAllButton = document.createElement("button");
          this.taskDiv = document.querySelector(".tasks");
          this.divQuestion = document.createElement("div");
+
+         this.inputEdit = document.createElement("input");
+         this.inputEditButton = document.createElement("button");
+         this.inputEditDiv = document.createElement("div");
       }
-   
+
       renderInit() {
          console.log(this.addButton);
          this.inputDiv.append(this.input, this.addButton);
@@ -41,14 +45,14 @@ document.addEventListener("DOMContentLoaded", () => {
          this.divQuestion.setAttribute("class", "possible_city");
          this.divQuestion.innerText = `${data.message}`;
       }
-   
+
 
       addWeatherGeo(temperature,feel_temperature,cloud,precipitation,icon,city) {
          this.mainDiv.appendChild(this.divGeo);
          const tempC = Math.round(+temperature - 273.15);
          const tempfeelC = Math.round(+feel_temperature - 273.15);
-         const tempF = Math.round(tempC*1.8 + 32); 
-         const tempfeelF = Math.round(tempfeelC*1.8 + 32); 
+         const tempF = Math.round(tempC*1.8 + 32);
+         const tempfeelF = Math.round(tempfeelC*1.8 + 32);
          this.divGeo.innerHTML = `<div><p>Where you are</p></div>
          <div><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${precipitation}"><div><p>${tempC} &#176;C / ${tempF} F </p><p>feels like:<br>${tempfeelC} &#176;C / ${tempfeelF} F</p></div></div>
          <div><p>${precipitation}</p></div>
@@ -68,16 +72,35 @@ document.addEventListener("DOMContentLoaded", () => {
          const editButton = document.createElement("button");
          divTaskButtons.appendChild(editButton);
          editButton.setAttribute("id",`edit${_id}`);
+         editButton.setAttribute("class", "edit_task_button");
          editButton.innerText = "Edit City";
 
          const deleteButton = document.createElement("button");
          divTaskButtons.appendChild(deleteButton);
          deleteButton.setAttribute("id",`${_id}`);
+         deleteButton.setAttribute("class", "delete_task_button");
          deleteButton.innerText = "Delete";
-         
       }
 
-      
+      editTask(button_id,name) {
+         console.log(button_id);
+         const button_idToArr = button_id.split("");
+         const b = button_idToArr.splice(0,4,);
+
+         //edit button id
+         const buttonEditId = button_idToArr.join("");
+         console.log(buttonEditId);
+         const divOneCity = document.querySelector(`#button${buttonEditId}`);
+         divOneCity.append(this.inputEditDiv);
+         this.inputEditDiv.append(this.inputEdit, this.inputEditButton);
+         this.inputEditButton.innerText = "Go";
+         this.inputEdit.setAttribute("value", `${name}`);
+
+         // const editButton = document.querySelector(`#${button_id}`);
+         // editButton.remove();
+      }
+
+
       deleteAllCities() {
          this.taskDiv.innerHTML = "";
       }
@@ -91,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
    class WeatherModel {
       constructor(view){
          this.view = view;
-      }       
+      }
    }
 
    class WeatherModelDB extends WeatherModel {
@@ -104,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const xhr = new XMLHttpRequest();
             xhr.open(method, "http://localhost:3030/cities");
             xhr.responseType = "json";
-            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             xhr.onload = () => {
                if(xhr.status === 200) {
                   resolve(xhr.response);
@@ -114,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   reject(error);
                }
             }
-   
+
             xhr.onerror = () => {
                reject(new Error("Network Error"));
             }
@@ -134,12 +157,24 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
 
+
+      async getCityById(id) {
+         try {
+            let result = await fetch(`http://localhost:3030/cities/${id}`, {
+               method: 'GET'})
+            let json = await result.json();
+            return json;
+         } catch(err) {
+             return err;
+         }
+      }
+
       deleteCitiesFromDBPromise(identificator) {
          return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open("DELETE", `http://localhost:3030/cities/${identificator}`);
             xhr.responseType = "json";
-            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');   
+            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             xhr.onload = () => {
                if(xhr.status === 200) {
                   resolve(xhr.response);
@@ -149,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   reject(error);
                }
             }
-   
+
             xhr.onerror = () => {
                reject(new Error("Network Error"));
             }
@@ -206,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.addCity = this.addCity.bind(this);
          this.deleteAll = this.deleteAll.bind(this);
          this.getCities = this.getCities.bind(this);
-         this.clickDelete = this.clickDelete.bind(this);
+         this.clickTask = this.clickTask.bind(this);
          this.findWeatherCity = this.findWeatherCity.bind(this);
          this.addHandle = this.addHandle.bind(this);
          this.addHandleRemove = this.addHandleRemove.bind(this);
@@ -221,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelW.getWeatherCity("GET", array[i].name)
                                           .then(data => {
                                              console.log(data);
-                                             this.mediator.collection(data);
+                                             // this.mediator.collection(data);
                                              this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.weather[0].main)
                                           })
                                           .catch(err => console.error(err));
@@ -230,15 +265,15 @@ document.addEventListener("DOMContentLoaded", () => {
             // this.view.addCityAndWeather(array[i].name,array[i]._id);
          }
       }
-      
+
       initCity() {
          this.modelDB.getCitiesFromDB()
-                        .then(result => result instanceof Error ? 
-                        console.log(result) : 
-                        this.renderInitCity(result));    
+                        .then(result => result instanceof Error ?
+                        console.log(result) :
+                        this.renderInitCity(result));
       }
 
-      
+
       findWeatherCity() {
          console.log(this.view.input.value);
          this.modelW.getWeatherCity("GET", this.view.input.value)
@@ -263,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       addCity() {
-         let value = this.view.input.value; 
+         let value = this.view.input.value;
          console.log(value);
          let valueobj = {
             name: `${value}`
@@ -273,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.modelDB.addCityToDBPromise("POST", valueToDB)
                            .then(data => {
                               // this.view.addCityAndWeather(data.name,data._id)
-                              // this.mediator.collection(data);
+                              // this.mediator.collect(data);
                               console.log(data);
                               this.showWeather(data.name,data._id);
                            })
@@ -287,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
          this.modelW.getWeatherCity("GET", name)
                                           .then(data => {
                                              console.log(data);
-                                             this.mediator.collection(data);
+                                             // this.mediator.collection(data);
                                              this.view.addCityAndWeather(name,_id,data.main.temp,data.weather[0].main)
                                           })
                                           .catch(err => console.error(err));
@@ -297,44 +332,63 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.addButton.removeEventListener("click", this.addCity);
       }
 
-      
+
       addHandle() {
          this.view.addButton.addEventListener("click", this.addCity);
       }
 
-      
+
       deleteAll(array) {
          for( let i = 0; i < array.length; i++) {
             console.log(66666);
             console.log(array[i]._id);
             this.modelDB.deleteCitiesFromDBPromise(array[i]._id);
-         
+
          }
          this.view.deleteAllCities();
       }
 
       getCities() {
          this.modelDB.getCitiesFromDB()
-                        .then(result => result instanceof Error ? 
-                        console.log(result) : 
-                        this.deleteAll(result));                                       
+                        .then(result => result instanceof Error ?
+                        console.log(result) :
+                        this.deleteAll(result));
       }
 
       deleteAllHandle() {
          this.view.deleteAllButton.addEventListener("click", this.getCities);
       }
 
-      clickDelete(e) {
-         if (e.target.className !== "city_example") {
+      clickTask(e) {
+         if (e.target.className === "delete_task_button") {
             const button = e.target;
             console.log(button.id);
             this.modelDB.deleteCitiesFromDBPromise(button.id);
             this.view.deleteCity(button.id);
+         } else if (e.target.className === "edit_task_button") {
+            console.log("edit");
+            const button = e.target;
+            console.log(button.id);
+
+            const button_idToArr = button.id.split("");
+            const b = button_idToArr.splice(0,4,);
+            //edit button id
+            const buttonEditId = button_idToArr.join("");
+            console.log(buttonEditId);
+
+            // this.view.editTask(button.id);
+            this.modelDB.getCityById(buttonEditId)
+                                          .then(data => {
+                                             this.view.editTask(button.id,data.name);
+                                             console.log(data);
+                                          })
+                                          .catch(err => console.error(err));
+
          }
       }
 
-      deleteTask() {
-         this.view.taskDiv.addEventListener("click", this.clickDelete);
+      workWithTask() {
+         this.view.taskDiv.addEventListener("click", this.clickTask);
       }
 
       getGeo() {
@@ -345,12 +399,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const longitude = pos.coords.longitude;
             console.log(pos.coords);
             this.modelW.getWeatherGeo(latitude,longitude)
-                        .then(result => result instanceof Error ? 
-                        console.log(result) : 
-                        this.view.addWeatherGeo(result[0],result[1],result[2],result[3],result[4],result[5],result[6]));                                       
+                        .then(result => result instanceof Error ?
+                        console.log(result) :
+                        this.view.addWeatherGeo(result[0],result[1],result[2],result[3],result[4],result[5],result[6]));
             geo.clearWatch(id);
          }, (err) => console.log(new Error(err)));
-      }   
+      }
    }
 
 
@@ -362,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       handle(){
          this.controller.deleteAllHandle();
-         this.controller.deleteTask();
+         this.controller.workWithTask();
       }
 
       init() {
@@ -377,6 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
    class Mediator {
       constructor() {
          this.functionDone = [];
+         this.collection = [];
       }
 
       subscribe(user) {
@@ -390,9 +445,11 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
 
-      collection(data) {
-         console.log(data);
-      }
+      // collect(data) {
+      //    this.collection.push(data);
+      //    console.log(this.collection);
+      // }
+
    }
 
    function start(){
@@ -403,19 +460,19 @@ document.addEventListener("DOMContentLoaded", () => {
       let mediator = new Mediator();
       let controller = new WeatherController(view,modelDB,modelW,mediator);
       let facade = new Facade(view,controller);
-      
 
-      
+
+
       facade.init();
       facade.handle();
    }
 
 
-   
+
 
    start();
 
-   
+
 
 
 

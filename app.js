@@ -38,6 +38,17 @@ app.get('/cities', (req, res) => {
 });
 
 
+app.get('/cities/:id', (req, res) => {
+   db.collection('cities').findOne({_id: ObjectId(req.params.id)}, (err,docs) => {
+      if(err) {
+         console.log(err);
+         return res.sendStatus(500);
+      }
+      res.send(docs);
+   });
+});
+
+
 app.post('/cities', (req,res) => {
    let city = {
       id: Date.now(),
