@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
          this.inputEdit = document.createElement("input");
          this.inputEditButton = document.createElement("button");
+         this.inputEditCancel = document.createElement("button");
          this.inputEditDiv = document.createElement("div");
          this.inputValue = this.inputValue.bind(this);
 
@@ -144,9 +145,12 @@ document.addEventListener("DOMContentLoaded", () => {
          const divOneCity = document.querySelector(`#button${buttonEditId}`);
          divOneCity.append(this.inputEditDiv);
          this.inputEditDiv.setAttribute("id", `input_zone${buttonEditId}`);
-         this.inputEditDiv.append(this.inputEdit, this.inputEditButton);
+         this.inputEditDiv.setAttribute("class", "input_zone");
+         this.inputEditDiv.append(this.inputEdit, this.inputEditButton, this.inputEditCancel);
          this.inputEditButton.innerText = "Go";
          this.inputEditButton.setAttribute("id",`go${buttonEditId}`);
+         this.inputEditCancel.innerText = "Cancel";
+         this.inputEditCancel.setAttribute("id",`cancel${buttonEditId}`);
 
          // const editButton = document.querySelector(`#${button_id}`);
          // editButton.remove();
@@ -160,6 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteCity(id) {
          const divOneCity = document.querySelector(`#button${id}`);
          divOneCity.remove();
+      }
+
+      removeInputEdit() {
+         const divEditCancel = document.querySelector(".input_zone");
+         divEditCancel.remove();
       }
    }
 
@@ -328,30 +337,53 @@ document.addEventListener("DOMContentLoaded", () => {
          this.goHandleRemove = this.goHandleRemove.bind(this);
          this.showWeather = this.showWeather.bind(this);
          this.inputEditHandleRemove = this.inputEditHandleRemove.bind(this);
+         this.cancelEditCity = this.cancelEditCity.bind(this);
+         this.cancelHandle = this.cancelHandle.bind(this);
       }
 
-      renderInitCity(array) {
-         for( let i = 0; i < array.length; i++) {
-            console.log(66666);
-            console.log(array[i]._id);
-            console.log(array[i].name);
-            this.modelW.getWeatherCity("GET", array[i].name)
+      renderInitCity(name,id,i) {
+         this.modelW.getWeatherCity("GET", name)
                                           .then(data => {
                                              console.log(data);
-                                             this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
+                                             this.view.addCityAndWeather(name,id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
+                                             this.mediator.list(i);
+                                             console.log(this.mediator.listI);
                                           })
                                           .catch(err => console.error(err));
 
 
-            // this.view.addCityAndWeather(array[i].name,array[i]._id);
-         }
+         // for( let i = 0; i < array.length; i++) {
+         //    console.log(66666);
+         //    console.log(array[i]._id);
+         //    console.log(array[i].name);
+         //    this.modelW.getWeatherCity("GET", array[i].name)
+         //                                  .then(data => {
+         //                                     console.log(data);
+         //                                     this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
+         //                                  })
+         //                                  .catch(err => console.error(err));
+
+
+         //    // this.view.addCityAndWeather(array[i].name,array[i]._id);
+         // }
       }
 
       initCity() {
+         // this.modelDB.getCitiesFromDB()
+         //                .then(result => result instanceof Error ?
+         //                console.log(result) :
+         //                this.renderInitCity(result));
+
          this.modelDB.getCitiesFromDB()
-                        .then(result => result instanceof Error ?
-                        console.log(result) :
-                        this.renderInitCity(result));
+                        .then(result => {
+                           console.log(result);
+                           for( let i = 0; i < result.length; i++) {
+                              console.log(66666);
+                              console.log(result[i]._id);
+                              console.log(result[i].name);
+                              this.renderInitCity(result[i].name,result[i]._id,i);
+                           }
+                        }).catch(err => console.error(err));
       }
 
 
@@ -463,6 +495,10 @@ document.addEventListener("DOMContentLoaded", () => {
          this.view.clearInputEdit();
       }
 
+      cancelEditCity() {
+         this.view.removeInputEdit();
+      }
+
 
       showWeather(name,_id) {
       //new request to show present weather!
@@ -505,6 +541,12 @@ document.addEventListener("DOMContentLoaded", () => {
       goHandle() {
          // Go press
          this.view.inputEditButton.addEventListener("click", this.goCity);
+      }
+
+
+      cancelHandle() {
+         // Cancel press
+         this.view.inputEditCancel.addEventListener("click", this.cancelEditCity);
       }
 
 
@@ -552,6 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                              this.view.inputValue(button.id,data.name);
                                              // this.view.editTask(button.id,data.name);
                                              this.inputEditHandle(buttonEditId);
+                                             this.cancelHandle();
                                              console.log(data);
                                           })
                                           .catch(err => console.error(err));
@@ -604,6 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
       constructor() {
          this.functionDone = [];
          this.collection = [];
+         this.listI = [];
       }
 
       subscribe(user) {
@@ -617,11 +661,9 @@ document.addEventListener("DOMContentLoaded", () => {
          }
       }
 
-      // collect(data) {
-      //    this.collection.push(data);
-      //    console.log(this.collection);
-      // }
-
+      list(i) {
+         this.listI.push(`${i}`);
+      }
    }
 
    function start(){
