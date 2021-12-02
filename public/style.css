@@ -23,6 +23,16 @@ input {
    font-size: 28px;
 }
 
+input.input_edit {
+   width: 300px;
+   height: 30px;
+   font-size: 28px;
+}
+
+button {
+   border-radius: 10px;
+}
+
 #add_city {
    height: 36px;
    font-size: 28px;
@@ -60,7 +70,9 @@ input {
 .city_example {
    display: flex;
    flex-direction: row;
-   background-color: khaki;
+   /* background-color: khaki; */
+   background-image: linear-gradient(to right, rgb(255, 255, 223), rgba(255, 255, 223, 0.904), rgba(255, 255, 223, 0.459) );
+   /* background-image: linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet);  */
    justify-content: space-between;
    margin-top: 10px;
 }

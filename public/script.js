@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
          this.inputEdit = document.createElement("input");
          this.inputEditButton = document.createElement("button");
          this.inputEditDiv = document.createElement("div");
+         this.inputValue = this.inputValue.bind(this);
+
+         this.editTask = this.editTask.bind(this);
       }
 
       renderInit() {
@@ -97,9 +100,16 @@ document.addEventListener("DOMContentLoaded", () => {
          divInputZone.remove();
       }
 
+      
+      inputValue(button_id,name) {
+         this.inputEdit.setAttribute("class", "input_edit");
+         this.inputEdit.value = `${name}`;
+         this.editTask(button_id,name);
+      }
+
 
       editTask(button_id,name) {
-         this.inputEdit.setAttribute("value", `${name}`);
+         // this.inputEdit.setAttribute("value", `${name}`);
 
          console.log(button_id);
          const button_idToArr = button_id.split("");
@@ -516,7 +526,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // this.view.editTask(button.id);
             this.modelDB.getCityById(buttonEditId)
                                           .then(data => {
-                                             this.view.editTask(button.id,data.name);
+                                             this.view.inputValue(button.id,data.name);
+                                             // this.view.editTask(button.id,data.name);
                                              this.inputEditHandle(buttonEditId);
                                              console.log(data);
                                           })
