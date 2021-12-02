@@ -67,14 +67,27 @@ document.addEventListener("DOMContentLoaded", () => {
          `;
       }
 
-      addCityAndWeather(name,_id,temp,weather_main) {
+      addCityAndWeather(name,_id,temperature,feel_temperature,icon,weather_main) {
          const divOneCity = document.createElement("div");
          this.taskDiv.appendChild(divOneCity);
          divOneCity.setAttribute("class", "city_example");
          divOneCity.setAttribute("id",`button${_id}`);
-         divOneCity.innerHTML = `<div id="weather_zone${_id}"><p>${name} ${temp} ${weather_main}</p></div>`;
 
+         const tempC = Math.round(+temperature - 273.15);
+         const tempfeelC = Math.round(+feel_temperature - 273.15);
+         const tempF = Math.round(tempC*1.8 + 32);
+         const tempfeelF = Math.round(tempfeelC*1.8 + 32);
+
+
+         divOneCity.innerHTML = `<div id="weather_zone${_id}" class = "weather_zone">
+         <div><p class = "name">${name}</p></div>
+         <div><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${weather_main}"><p>${weather_main}</p></div>
+         <div><p>${tempC} &#176;C / ${tempF} F </p><p>feels like:<br>${tempfeelC} &#176;C / ${tempfeelF} F</p></div>
+         </div>`;
+
+         //edit button insert
          const divTaskButtons = document.createElement("div");
+         divTaskButtons.setAttribute("class","edit_instuments");
          divOneCity.appendChild(divTaskButtons);
          const editButton = document.createElement("button");
          divTaskButtons.appendChild(editButton);
@@ -82,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
          editButton.setAttribute("class", "edit_task_button");
          editButton.innerText = "Edit City";
 
+
+         //delete button insert
          const deleteButton = document.createElement("button");
          divTaskButtons.appendChild(deleteButton);
          deleteButton.setAttribute("id",`${_id}`);
@@ -90,11 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
-      goFromEditTask(name,_id,temp,weather_main) {
-         console.log(_id); //this is new id, but we need old
+      goFromEditTask(name,_id,temperature,feel_temperature,icon,weather_main) {
+         // console.log(_id); //this is new id, but we need old
          const divWeatherZone = document.querySelector(`#weather_zone${_id}`);
          console.log(divWeatherZone);
-         divWeatherZone.innerHTML = `<p>${name} ${temp} ${weather_main}</p>`;
+
+         const tempC = Math.round(+temperature - 273.15);
+         const tempfeelC = Math.round(+feel_temperature - 273.15);
+         const tempF = Math.round(tempC*1.8 + 32);
+         const tempfeelF = Math.round(tempfeelC*1.8 + 32);
+
+         divWeatherZone.innerHTML = `<div><p class = "name">${name}</p></div>
+         <div><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${weather_main}"><p>${weather_main}</p></div>
+         <div><p>${tempC} &#176;C / ${tempF} F </p><p>feels like:<br>${tempfeelC} &#176;C / ${tempfeelF} F</p></div>`;
          
          const divInputZone = document.querySelector(`#input_zone${_id}`);
          divInputZone.remove();
@@ -315,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelW.getWeatherCity("GET", array[i].name)
                                           .then(data => {
                                              console.log(data);
-                                             this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.weather[0].main)
+                                             this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
                                           })
                                           .catch(err => console.error(err));
 
@@ -447,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                           .then(data => {
                                              console.log(data);
                                              // this.mediator.collection(data);
-                                             this.view.addCityAndWeather(name,_id,data.main.temp,data.weather[0].main)
+                                             this.view.addCityAndWeather(name,_id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
                                           })
                                           .catch(err => console.error(err));
       }
@@ -457,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelW.getWeatherCity("GET", name)
                                              .then(data => {
                                                 console.log(data);
-                                                this.view.goFromEditTask(name,_id,data.main.temp,data.weather[0].main)
+                                                this.view.goFromEditTask(name,_id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main)
                                              })
                                              .catch(err => console.error(err));
       }

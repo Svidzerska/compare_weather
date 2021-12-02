@@ -1,20 +1,22 @@
 body {
    margin: 0;
    padding: 0;
-   background-size: cover;
+   background-size:cover;
    background-repeat: no-repeat;
+   background-attachment:fixed;
    height: 100vh;
 }
 
 .main {
+   width: 600px;
    display: flex;
    flex-direction: column;
    vertical-align: bottom;
-   width: fit-content;
+   /* width: fit-content; */
    margin-left: auto;
    margin-right: auto;
    padding-top: 60px;
-   
+   padding-bottom: 50px;
 }
 
 input {
@@ -26,7 +28,7 @@ input {
 input.input_edit {
    width: 300px;
    height: 30px;
-   font-size: 28px;
+   font-size: 24px;
 }
 
 button {
@@ -70,6 +72,7 @@ button {
 .city_example {
    display: flex;
    flex-direction: row;
+   flex-wrap: wrap;
    /* background-color: khaki; */
    background-image: linear-gradient(to right, rgb(255, 255, 223), rgba(255, 255, 223, 0.904), rgba(255, 255, 223, 0.459) );
    /* background-image: linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet);  */
@@ -78,11 +81,27 @@ button {
 }
 
 
-
 .city_example > div {
    display: flex;
    flex-direction: row;
    align-items: center;
+   flex-basis: 50%;
+}
+
+.weather_zone p {
+   text-align: center;
+}
+
+.weather_zone p.name {
+   font-size: 18px;
+}
+
+.weather_zone > div {
+   margin-left: 10px;
+}
+
+.edit_instuments {
+   justify-content: flex-end;
 }
 
 .city_example > div > button {
