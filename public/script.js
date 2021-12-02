@@ -381,7 +381,14 @@ document.addEventListener("DOMContentLoaded", () => {
                               console.log(66666);
                               console.log(result[i]._id);
                               console.log(result[i].name);
-                              this.renderInitCity(result[i].name,result[i]._id,i);
+                              // if (i === 0) {
+                                 this.renderInitCity(result[i].name,result[i]._id,i);
+                                 // const a = document.querySelectorAll(".city_example");//это срабатывает ранее, чем появляются элементы
+                                 // console.log(a); //исходное значение
+                                 // var arr = a.length;
+                                 // console.log(arr);
+                              // } 
+                              
                            }
                         }).catch(err => console.error(err));
       }
@@ -393,7 +400,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                           .then(data => {
                                              console.log(data);
                                              if (data.cod === 200) {
-                                                console.log("999999999999999999999");
                                                 this.view.questionInput(data);
                                                 this.mediator.subscribe(this.addHandle);
                                                 this.addHandle();
