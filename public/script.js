@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                           .catch(err => console.error(err));
       }
 
-      findWeatherCityEdit() {
+      findWeatherCityEdit(e) {
          //при инпуте в инпут вносятся новые данные и там остаются, поскольку инпут один
          console.log(this.view.inputEdit.value);
          this.modelW.getWeatherCity("GET", this.view.inputEdit.value)
@@ -368,8 +368,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
-      inputEditHandle() {
-         this.view.inputEdit.addEventListener("input", this.findWeatherCityEdit);
+      inputEditHandle(id) {
+         const inputExample = document.querySelector(`#input_zone${id}`);
+         inputExample.addEventListener("input", this.findWeatherCityEdit);
       }
 
       inputEditHandleRemove() {
@@ -502,7 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelDB.deleteCitiesFromDBPromise(button.id);
             this.view.deleteCity(button.id);
          } else if (e.target.className === "edit_task_button") {
-            // this.view.clearInputEdit();
             console.log("new new edit");
             const button = e.target;
             console.log(button.id);
@@ -517,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.modelDB.getCityById(buttonEditId)
                                           .then(data => {
                                              this.view.editTask(button.id,data.name);
-                                             this.inputEditHandle();
+                                             this.inputEditHandle(buttonEditId);
                                              console.log(data);
                                           })
                                           .catch(err => console.error(err));
