@@ -341,55 +341,23 @@ document.addEventListener("DOMContentLoaded", () => {
          this.cancelHandle = this.cancelHandle.bind(this);
       }
 
-      renderInitCity(name,id,i) {
+      renderInitCity(name,id,result,n) {
          this.modelW.getWeatherCity("GET", name)
-                                          .then(data => {
-                                             console.log(data);
-                                             this.view.addCityAndWeather(name,id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
-                                             this.mediator.list(i);
-                                             console.log(this.mediator.listI);
-                                          })
-                                          .catch(err => console.error(err));
-
-
-         // for( let i = 0; i < array.length; i++) {
-         //    console.log(66666);
-         //    console.log(array[i]._id);
-         //    console.log(array[i].name);
-         //    this.modelW.getWeatherCity("GET", array[i].name)
-         //                                  .then(data => {
-         //                                     console.log(data);
-         //                                     this.view.addCityAndWeather(array[i].name,array[i]._id,data.main.temp,data.main.feels_like,data.weather[0].icon,data.weather[0].main);
-         //                                  })
-         //                                  .catch(err => console.error(err));
-
-
-         //    // this.view.addCityAndWeather(array[i].name,array[i]._id);
-         // }
+            .then(data => {
+               console.log(data);
+               this.view.addCityAndWeather(name, id, data.main.temp, data.main.feels_like, data.weather[0].icon, data.weather[0].main);
+               if ((result.length - n) > 1) {
+                  this.renderInitCity(result[n+1].name,result[n+1]._id,result,n+1);
+               }
+            })
+            .catch(err => console.error(err));
       }
 
       initCity() {
-         // this.modelDB.getCitiesFromDB()
-         //                .then(result => result instanceof Error ?
-         //                console.log(result) :
-         //                this.renderInitCity(result));
-
          this.modelDB.getCitiesFromDB()
                         .then(result => {
-                           console.log(result);
-                           for( let i = 0; i < result.length; i++) {
-                              console.log(66666);
-                              console.log(result[i]._id);
-                              console.log(result[i].name);
-                              // if (i === 0) {
-                                 this.renderInitCity(result[i].name,result[i]._id,i);
-                                 // const a = document.querySelectorAll(".city_example");//это срабатывает ранее, чем появляются элементы
-                                 // console.log(a); //исходное значение
-                                 // var arr = a.length;
-                                 // console.log(arr);
-                              // } 
-                              
-                           }
+                           let n = 0;
+                           this.renderInitCity(result[n].name,result[n]._id,result,n);
                         }).catch(err => console.error(err));
       }
 
@@ -397,20 +365,20 @@ document.addEventListener("DOMContentLoaded", () => {
       findWeatherCity() {
          console.log(this.view.input.value);
          this.modelW.getWeatherCity("GET", this.view.input.value)
-                                          .then(data => {
-                                             console.log(data);
-                                             if (data.cod === 200) {
-                                                this.view.questionInput(data);
-                                                this.mediator.subscribe(this.addHandle);
-                                                this.addHandle();
-                                             } else if (data.cod === '404') {
-                                                this.view.errorInput(data);
-                                                if (this.mediator.done() === true) {
-                                                   this.addHandleRemove();
-                                                }
-                                             } 
-                                          })
-                                          .catch(err => console.error(err));
+            .then(data => {
+               console.log(data);
+               if (data.cod === 200) {
+                  this.view.questionInput(data);
+                  this.mediator.subscribe(this.addHandle);
+                  this.addHandle();
+               } else if (data.cod === '404') {
+                  this.view.errorInput(data);
+                  if (this.mediator.done() === true) {
+                     this.addHandleRemove();
+                  }
+               }
+            })
+            .catch(err => console.error(err));
       }
 
       findWeatherCityEdit(e) {
