@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
          this.addButton.setAttribute("id","add_city");
          this.divGeo = document.createElement("div");
          this.divGeo.setAttribute("class","geoFixed");
-         this.mainDiv = document.querySelector(".main");
-         this.inputDiv = document.querySelector(".input_field");
+         this.$mainDiv = $(".main");
+         this.$inputDiv = $(".input_field");
          this.deleteAllButton = document.createElement("button");
          this.taskDiv = document.querySelector(".tasks");
          this.divQuestion = document.createElement("div");
@@ -25,10 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderInit() {
          console.log(this.addButton);
-         this.inputDiv.append(this.input, this.addButton);
+         this.$inputDiv.append(this.input, this.addButton);
          this.addButton.innerHTML = "Add";
          this.input.setAttribute("placeholder",`Type your city here...`);
-         this.mainDiv.appendChild(this.deleteAllButton);
+         this.$mainDiv.append(this.deleteAllButton);
          this.deleteAllButton.setAttribute("id","delete_all");
          this.deleteAllButton.innerText = "Delete All Cities";
       }
@@ -42,21 +42,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       questionInput(data) {
-         this.inputDiv.appendChild(this.divQuestion);
+         this.$inputDiv.append(this.divQuestion);
          this.divQuestion.setAttribute("class", "possible_city");
          this.divQuestion.innerText = `${data.name},${data.sys.country},${data.coord.lat},${data.coord.lon}`;
 
       }
 
       errorInput(data) {
-         this.inputDiv.appendChild(this.divQuestion);
+         this.$inputDiv.append(this.divQuestion);
          this.divQuestion.setAttribute("class", "possible_city");
          this.divQuestion.innerText = `${data.message}`;
       }
 
 
       addWeatherGeo(temperature,feel_temperature,cloud,precipitation,icon,city) {
-         this.mainDiv.appendChild(this.divGeo);
+         console.log(this.$mainDiv);
+         this.$mainDiv.append(this.divGeo);
          const tempC = Math.round(+temperature - 273.15);
          const tempfeelC = Math.round(+feel_temperature - 273.15);
          const tempF = Math.round(tempC*1.8 + 32);
